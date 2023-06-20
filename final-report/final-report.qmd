@@ -1,0 +1,197 @@
+---
+title: "Team 15 The Scientists: Crime Prediction Proposal"
+format:
+    jss-pdf:
+        keep-tex: true
+    jss-html: default
+author:
+  - name: Xiangyu Jin (xjin13)
+    email: xjin13@illinois.edu
+    affiliations:
+      - name: UIUC
+        department: Department of Statistics
+  - name: Vinayak Bagdi (vbagdi2)
+    email: vbagdi2@illinois.edu
+    affiliations:
+      - name: UIUC
+        department: Department of Statistics
+abstract: |
+  The project aims to predict the type of crime an arrestee may have committed based on their background information such as race, sex, age, and other attributes. The central idea is to examine whether there are any relationships between crime types and arrestee's background information and to study the crime distribution in Champaign The project employs classification models or random forests model to predict the crime type based on the information about the arrestees. The project uses data before 2018 as training data and data after 2018 as testing data to test the model's accuracy. The methods employed so far include data cleaning, feature engineering, data manipulation, data visualization, and data analysis using R. The implications of the work done so far will help to improve the understanding of crime distribution in Champaign and aid in the development of effective crime prevention and control strategies.
+  
+keywords: [R, group project]
+keywords-formatted: [R, group project]
+bibliography: bibliography.bib  
+---
+
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(hrbrthemes)
+library(caret)
+library(ranger)
+library(randomForest)
+library(ROCR)
+library(myPackage)
+```
+
+## Introduction
+
+The project aims to examine the relationship between the type of crime and the background information of the arrestees, including race, sex, age, and other attributes. The problem being addressed is the high rate of crime in Champaign, which poses a significant threat to the safety and well-being of residents. It is essential to develop effective crime prevention and control strategies that take into account the underlying factors contributing to crime. The objective of the project is to predict the type of crime an arrestee may have committed based on their background information, which can aid in developing effective crime prevention strategies.
+
+The motivation for pursuing this problem is to improve the understanding of crime distribution in Champaign and to identify potential factors contributing to the high rate of crime. The project can aid in the development of targeted crime prevention and control strategies that can help to reduce crime rates in the city. Additionally, the project can help law enforcement agencies to allocate resources effectively and efficiently.
+
+## Related Works
+
+@Travaini2022 explores the use of machine learning algorithms to predict the likelihood of criminal recidivism. The study used a dataset consisting of demographic and criminal history variables of inmates to develop a prediction model. This study is relevant to our project as it also uses machine learning algorithms to predict criminal activities based on input features. However, the focus of our project is on predicting the type of crime based on the background information of the arrestees, whereas the study by @Travaini2022 is focused on predicting the likelihood of criminal recidivism. Both  employ machine learning algorithms to predict criminal activities based on input features. However, the input features and prediction targets are different. Our project focuses on predicting the type of crime based on the background information of the arrestees, whereas the study by @Travaini2022 focuses on predicting the likelihood of criminal recidivism based on demographic and criminal history variables of inmates.
+
+
+@Saeed2015 explores the use of machine learning algorithms to classify criminal activities based on the input features. The study used a dataset consisting of demographic and behavioral variables of criminals to develop a prediction model.This study is relevant to the current project as it also uses machine learning algorithms to predict criminal activities based on input features. The focus of our project is on predicting the type of crime based on the background information of the arrestees, whereas the study by @Saeed2015 is focused on classifying criminal activities based on the input features. Both employ machine learning algorithms to predict criminal activities based on input features. However, the prediction targets are different. Our project focuses on predicting the type of crime based on the background information of the arrestees, whereas the study by @Saeed2015 focuses on classifying criminal activities based on the input features.
+
+@Mandalapu2023 is a systematic review of crime prediction using machine learning techniques. The authors reviewed and analyzed 82 research papers from 2010 to 2019. The review highlights the importance of data preprocessing, feature selection, and algorithm selection in crime prediction. The authors also discuss the limitations and challenges of using machine learning in crime prediction, such as data imbalance, interpretability, and ethical concerns. This work relates to our current project as it provides insights into the state of the art in crime prediction using machine learning techniques. It highlights the importance of data preprocessing and algorithm selection, which are critical steps in our project. It also discusses the challenges and limitations of using machine learning in crime prediction, which we should be aware of when interpreting our results. Our approach will be similar to the reviewed papers in terms of using machine learning techniques for crime prediction. However, we will focus on a specific dataset from Champaign and investigate the relationship between crime types and arrestee's background information. We will also perform data preprocessing, feature engineering, and model selection based on the characteristics of our dataset.
+
+
+@Pearsall2016 analyzes the implementation and impact of predictive policing practices in Baltimore, Maryland. The authors use administrative data from the Baltimore Police Department to evaluate the accuracy and effectiveness of crime predictions and to examine the potential biases and ethical implications of using predictive policing. The study finds that predictive policing does not significantly reduce crime and may exacerbate existing racial and socioeconomic disparities in policing. This work relates to our project as it raises important ethical and social issues in crime prediction using machine learning. It highlights the potential biases and unintended consequences of using predictive policing and emphasizes the need for transparency and accountability in policing practices. Our approach will differ from the reviewed paper as we will not be directly implementing predictive policing. However, we will be using models to predict crime types based on arrestee's background information, which raises similar ethical and social concerns. We will need to consider the potential biases and unintended consequences of using our models and ensure that our results are transparent and accountable.
+
+
+@Lin2018 proposes a crime prediction model based on long short-term memory (LSTM) neural networks. The authors use crime data from a police department in China to train and test their model. They compare the performance of their LSTM model with other machine learning models and find that LSTM outperforms traditional models in predicting crime. This work relates to our project as it proposes a machine learning model specifically designed for crime prediction. It suggests that deep learning models, such as LSTM, may be more suitable for capturing the temporal patterns and dependencies in crime data. We can consider using LSTM or other deep learning models as an alternative approach to our prediction task. Our approach will be similar to the reviewed paper in terms of using machine learning models for crime prediction. However, we will be using a different dataset from Champaign and a different set of predictors. We will also be comparing the performance of different machine learning models to select the best model for our task.
+## Data
+
+```{r}
+# Reading online CSV file with big limit
+my_data = load_data()
+summary(my_data)
+```
+
+The data set contains both numerical and character data. City of Urbana collected the data and this data set is available on Urbana's Open Data website. The whole data set contains 216554 observations and 25 features. The data set is updated monthly with two months lag. The data set is in CSV form. When we load the data, we need to specify length of csv file as large as possible. Otherwise, only first 1000 observations will be loaded.
+
+```{r}
+# First five observations of the dataset. 
+head(my_data, n = 5)
+```
+## EDA
+
+```{r}
+my_data %>%
+  select(where(is.numeric)) %>% 
+  summary()
+```
+### Data Cleaning and Feature Engineering
+
+```{r}
+my_data = myPackage::process_data(my_data)
+```
+
+```{r}
+summary(my_data)
+```
+
+```{r}
+sum(is.na(my_data))
+```
+
+After data cleaning and feature engineering, we filter the data only after year 2000. Moreover, we only select variables `incident_number`, `year_of_arrest`, `month_of_arrest`,`crime_category_description`, `age_at_arrest`, `arrestee_sex`, `arrestee_race`, `arrestee_employment_description`, `arrestee_home_city`, and `arrestee_home_state` to use in our model. Since other variables such as `arrest_code` do not seem relate to crime prediction. 
+
+#### Plots
+
+```{r}
+# number of cases versus time (year)
+myPackage::tn_plot(my_data)
+```
+
+Based on this graph, we can see that 2003 has the highest number of arrests from 2000 to 2023. Moreover, there is a decreasing trend on number of arrests through out years.
+
+```{r}
+# Graph to see in each year arrestees sex proportion
+myPackage::ts_plot(my_data)
+```
+
+Based on this graph, we can see that Male contributes over 50% of arrests each year, which means that MALE is more likely to got arrested compared with FEMALE.
+
+```{r}
+# Graph to see in each year arrestee race proportion
+myPackage::tr_plot(my_data)
+```
+
+Based on this graph, we can see there BALCK and WHITE contribute over 80% arrests. We can roughly see that WHITE contributes a little more than BLACK.
+
+```{r}
+## Graph to show proportions of arrestee home city in each year
+myPackage::th_plot(my_data)
+
+```
+
+Based on this graph, we can see that most arrestees are from URBANA. Arrestess from CHAMPAIGN and Other home cities roughtly contribute the same to the total number of arrests in each year.
+
+```{r}
+# Create visulization to see age distribution in each year
+myPackage::ta_plot(my_data)
+
+```
+
+As shown in the graph, we can see that the average age of arrestees in each year is gradually increasing. And the range of age is also increasing along the year. Age distribution seems more spread out along th year. 
+
+```{r}
+# Create visulization to see relationship between arrestee sex and arrestee race
+myPackage::sr_plot(my_data)
+```
+In the graph above, we can see that MALE contributes more than FEMALE in ASIAN, BLACK, HISPANIC, and WHITE races. Especially in ASIAN and HISPANIC races, we need to consider the correlation between races and sex. Moreover, counts of AMERICAN INDIAN?ALASKAS and UNKOWN races are so few that we might consider drop it in modeling. 
+
+### Method and Results
+
+#### Random Forests
+
+The modeling technique we are going to use is Random Forests. Random Forests is a machine learning algorithm that combines multiple decision trees to produce a more accurate and stable prediction. It reduces overfitting by building each tree on a random subset of the data and a random subset of the features. It handles both categorical and numerical data, is less sensitive to outliers and noise, and can handle missing data. Random Forests has many applications, including predictive modeling in various fields, feature selection, anomaly detection, and image and text classification. It is easy to interpret and visualize the results, making it a powerful and popular algorithm in the machine learning community.
+
+We choose random forests as our modeling algorithm because Random Forests can handle complex and non-linear relationships between the input features and the target variable. It can capture interactions and correlations between the variables, which may not be captured by simpler models such as linear regression. And more importantly, it can dorectly handle both categorical and numerical data since we have both type in our data set. 
+
+In this algorithm, precision, which is the proportion of true positives out of the total predicted positives, will be used to assess the model’s performance. It measures the model's ability to identify true positives
+
+#### Results
+```{r}
+# Split the data
+set.seed(447)
+
+model_data = myPackage::model_data(my_data)
+
+
+rf_model = myPackage::model(model_data)
+
+print(rf_model)
+
+# best mtry 8
+# get the test data 
+set.seed(447)
+trainIndex <- createDataPartition(1:nrow(model_data), p = 0.7, list = FALSE)
+test <- model_data[-trainIndex, ]
+
+prediction = predict(rf_model, test)
+
+# evaluation
+confusionMatrix(prediction, as.factor(test$crime_category_description))
+```
+
+
+Our random forest model has overall accuracy of 0.6170. It's doing well in crimes that happened a lot but the model is doing poorly on crimes that happened few along the time. 
+
+![shiny](shiny.png)
+There are three inputs in our shiny app. We can use this shiny app to predict what type of crime the suspect is committed to based on the inputs of suspect information. As shown in the screenshot, our model predicts the MALE with those information inputs is likely committed to Warrants & Summons. It is showing the number of arrests of different race in each year and gender proportion of arrestees in each year. And there are six more EDA graphs below. 
+
+## Conclusion and Future Work
+
+Conclusion:
+
+In this project, we explored the relationship between the background information of arrestees and the types of crime they may have committed. We used machine learning models to predict the crime type based on the available data in the Champaign Arrests dataset. We cleaned and preprocessed the data using R and applied classification models and random forest models for our prediction task. We evaluated the accuracy of our models using training and testing data and selected the best-performing model for our task. We also visualized the crime distribution in Champaign using ggplot2.Through our analysis, we found that certain background attributes, such as age and gender, have a significant relationship with the types of crimes that an arrestee may have committed. Additionally, we found that our machine learning models achieved reasonable prediction accuracy, with the random forest model outperforming the classification models. Overall, our project provides insights into the factors that may contribute to certain types of crimes and demonstrates the potential of machine learning models for crime prediction tasks. However, our findings should be interpreted with caution, and the ethical and social implications of using such models in policing practices should be carefully considered.
+
+Future Work:
+
+There are several possible directions for future work on this project. First, we could explore the use of deep learning models, such as LSTM or CNN, for crime prediction tasks, as suggested by previous research. These models may be better suited for capturing the temporal and spatial patterns in crime data.Second, we could further investigate the factors that contribute to certain types of crimes by incorporating additional data sources, such as demographic and socioeconomic data. This may provide more comprehensive insights into the social and economic factors that drive crime. Third, we could expand our analysis to other cities or regions to examine whether our findings generalize to other contexts. This would require collecting and preprocessing additional data from different sources and applying similar machine learning models to the data. Finally, we could examine the ethical and social implications of using machine learning models for crime prediction in more detail. This could involve conducting a critical analysis of the potential biases and unintended consequences of using such models in policing practices and proposing strategies to address these issues.
+
+## Contribution
+
+Vinayak worked on the shiny app, related work, abstract, introduction, conclusion/future works
+Xiangyu worked on the EDA, Modeling, and Method. 
+
+
+Vinayak: 50%
+Xiangyu: 50%

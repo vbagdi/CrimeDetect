@@ -1,0 +1,41 @@
+---
+title: "Team 15 The Scientists: Crime Prediction Proposal"
+format:
+    jss-pdf:
+        keep-tex: true
+    jss-html: default
+author:
+  - name: Xiangyu Jin (xjin13)
+    email: xjin13@illinois.edu
+    affiliations:
+      - name: UIUC
+        department: Department of Statistics
+  - name: Nicholas Wong (nwong27)
+    email: nwong27@illinois.edu
+    affiliations:
+      - name: UIUC
+        department: Department of Statistics
+abstract: |
+  We are trying to predict crime type based on arrestee's information
+keywords: [R, group project]
+keywords-formatted: [R, group project]
+bibliography: bibliography.bib  
+---
+
+## Overview {#sec-intro}
+
+To predict the type of crime an arrestee may have committed based on their background information such as race, sex, age, and etc, is a interesting topic to us. We want to see if there is any relationships between crime types and arrestee's background information, and to see crime distribution in Chicago. 
+
+There are numerical and categorical data in these arrestee's attributes. Thus, when we try to find fit models, we need to be careful. Moreover, since it's a large data set, we need to some data cleaning and feature engineering. There is a paper about crime prediction, we want to do the similar prediction on crime type based on arrestee's information. <https://arxiv.org/pdf/1508.02050.pdf>
+
+In Chicago Data Portal, there is record that has crime record in Chicago since 2001. The data set contains information about every arrest and arrestee, and is updated daily. This data set is provided by Chicago Police Department. The link to the data set website is: <https://data.cityofchicago.org/Public-Safety/Arrests/dpt3-jri9>
+
+
+The intuition is we can use Classification models or random forests model to predict the crime type based on information about arrestees. We can use data before 2018 as training data and data after 2018 as testing data to test our model accuracy. In this course, we learned how to use R to perform data manipulation, data cleaning, data visualization, and data analysis to finish this project.We will probably use tidyr to clean the data and ggplot2 to draw visualization graph. package caret will be used for training the prediction models.
+
+
+## Contribution
+
+Xiangyu wrote the proposal and Nick participated in decision making.
+
+Xiangyu 90 Nick 10

@@ -1,0 +1,178 @@
+---
+title: "Team 15 The Scientists: Crime Prediction Proposal"
+format:
+    jss-pdf:
+        keep-tex: true
+    jss-html: default
+author:
+  - name: Xiangyu Jin (xjin13)
+    email: xjin13@illinois.edu
+    affiliations:
+      - name: UIUC
+        department: Department of Statistics
+  - name: Vinayak Bagdi (vbagdi2)
+    email: vbagdi2@illinois.edu
+    affiliations:
+      - name: UIUC
+        department: Department of Statistics
+abstract: |
+   The project aims to predict the type of crime an arrestee may have committed based on their background information such as race, sex, age, and other attributes. The central idea is to examine whether there are any relationships between crime types and arrestee's background information and to study the crime distribution in Champaign The project employs classification models or random forests model to predict the crime type based on the information about the arrestees. The project uses data before 2018 as training data and data after 2018 as testing data to test the model's accuracy. The methods employed so far include data cleaning, feature engineering, data manipulation, data visualization, and data analysis using R. The implications of the work done so far will help to improve the understanding of crime distribution in Champaign and aid in the development of effective crime prevention and control strategies.
+
+keywords: [R, group project]
+keywords-formatted: [R, group project]
+bibliography: bibliography.bib  
+---
+
+  
+### Introduction
+
+The project aims to examine the relationship between the type of crime and the background information of the arrestees, including race, sex, age, and other attributes. The problem being addressed is the high rate of crime in Champaign, which poses a significant threat to the safety and well-being of residents. It is essential to develop effective crime prevention and control strategies that take into account the underlying factors contributing to crime. The objective of the project is to predict the type of crime an arrestee may have committed based on their background information, which can aid in developing effective crime prevention strategies.
+
+The motivation for pursuing this problem is to improve the understanding of crime distribution in Champaign and to identify potential factors contributing to the high rate of crime. The project can aid in the development of targeted crime prevention and control strategies that can help to reduce crime rates in the city. Additionally, the project can help law enforcement agencies to allocate resources effectively and efficiently.
+
+### Related Works
+
+@Travaini2022 explores the use of machine learning algorithms to predict the likelihood of criminal recidivism. The study used a dataset consisting of demographic and criminal history variables of inmates to develop a prediction model. This study is relevant to our project as it also uses machine learning algorithms to predict criminal activities based on input features. However, the focus of our project is on predicting the type of crime based on the background information of the arrestees, whereas the study by @Travaini2022 is focused on predicting the likelihood of criminal recidivism. Both  employ machine learning algorithms to predict criminal activities based on input features. However, the input features and prediction targets are different. Our project focuses on predicting the type of crime based on the background information of the arrestees, whereas the study by @Travaini2022 focuses on predicting the likelihood of criminal recidivism based on demographic and criminal history variables of inmates.
+
+
+@Saeed2015 explores the use of machine learning algorithms to classify criminal activities based on the input features. The study used a dataset consisting of demographic and behavioral variables of criminals to develop a prediction model.This study is relevant to the current project as it also uses machine learning algorithms to predict criminal activities based on input features. The focus of our project is on predicting the type of crime based on the background information of the arrestees, whereas the study by @Saeed2015 is focused on classifying criminal activities based on the input features. Both employ machine learning algorithms to predict criminal activities based on input features. However, the prediction targets are different. Our project focuses on predicting the type of crime based on the background information of the arrestees, whereas the study by @Saeed2015 focuses on classifying criminal activities based on the input features.
+
+@Mandalapu2023 is a systematic review of crime prediction using machine learning techniques. The authors reviewed and analyzed 82 research papers from 2010 to 2019. The review highlights the importance of data preprocessing, feature selection, and algorithm selection in crime prediction. The authors also discuss the limitations and challenges of using machine learning in crime prediction, such as data imbalance, interpretability, and ethical concerns. This work relates to our current project as it provides insights into the state of the art in crime prediction using machine learning techniques. It highlights the importance of data preprocessing and algorithm selection, which are critical steps in our project. It also discusses the challenges and limitations of using machine learning in crime prediction, which we should be aware of when interpreting our results. Our approach will be similar to the reviewed papers in terms of using machine learning techniques for crime prediction. However, we will focus on a specific dataset from Champaign and investigate the relationship between crime types and arrestee's background information. We will also perform data preprocessing, feature engineering, and model selection based on the characteristics of our dataset.
+
+
+
+
+
+
+
+### Data
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(hrbrthemes)
+# Reading online CSV file with big limit
+my_data = read_csv("https://data.urbanaillinois.us/resource/afbd-8beq.csv?$limit=999999")
+summary(my_data)
+```
+
+-   The data set contains both numerical and character data. City of Urbana collected the data and this data set is available on Urbana's Open Data website. The whole data set contains 216554 observations and 25 features. The data set is updated monthly with two months lag. When we load the data, we need to specify length of csv file as large as possible. Otherwise, only first 1000 observations will be loaded.
+
+-   Ref: <https://data.urbanaillinois.us/Police/Urbana-Police-Arrests-Since-1988/afbd-8beq>
+
+```{r}
+# First five observations of the dataset. 
+head(my_data, n = 5)
+```
+
+### Exploratory Data Analysis (EDA)
+
+```{r}
+my_data %>%
+  select(where(is.numeric)) %>% 
+  summary()
+```
+
+#### Data Cleaning and Feature Engineering
+
+```{r}
+my_data = my_data %>% 
+  filter(year_of_arrest >= 2000) %>% 
+  filter(age_at_arrest > 0) %>% 
+  select(incident_number, year_of_arrest, month_of_arrest, crime_category_description, age_at_arrest, arrestee_sex, arrestee_race, arrestee_employment_description, arrestee_home_city, arrestee_home_state) %>% 
+  filter(arrestee_sex == "MALE" | arrestee_sex == "FEMALE") %>% 
+  drop_na()
+```
+
+#### plots
+
+```{r}
+# number of cases versus time (year)
+my_data %>% 
+  count(year_of_arrest) %>% 
+  ggplot(aes(x = year_of_arrest, y = n)) +
+  geom_line( color="grey") +
+  geom_point(shape=21, color="black", fill="#69b3a2", size=2) +
+  ggtitle("Number of Arrests in Urbana-Champaign since 2000") +
+  labs(x = "Year", y = "Number of Arrests")
+```
+
+Based on this graph, we can see that 2003 has the highest number of arrests from 2000 to 2023. Moreover, there is a decreasing trend on number of arrests through out years.
+
+```{r}
+# Graph to see in each year arrestees sex proportion
+my_data %>% 
+  ggplot(aes(x = year_of_arrest, fill = arrestee_sex)) +
+  geom_histogram(binwidth = 0.5, color="#e9ecef", alpha=0.9) +
+  ggtitle("Arrestee Sex in Urbana-Champaign since 2000") +
+  labs(x = "Year", y = "Number of Arrests")
+  
+```
+
+Based on this graph, we can see that Male contributes over 50% of arrests each year, which means that MALE is more likely to got arrested compared with FEMALE.
+
+```{r}
+# Graph to see in each year arrestee race proportion
+my_data %>% 
+  ggplot(aes(x = year_of_arrest, fill = arrestee_race)) +
+  geom_histogram(binwidth = 0.5, color="#e9ecef", alpha=0.9) +
+  ggtitle("Arrestee Race in Urbana-Champaign since 2000") +
+  labs(x = "Year", y = "Number of Arrests")
+```
+
+Based on this graph, we can see there BALCK and WHITE contribute over 80% arrests. We can roughly see that WHITE contributes a little more than BLACK.
+
+```{r}
+# Check CHAMPAIGN spelling
+unique(str_extract_all(my_data$arrestee_home_city, pattern = "\\bCHAMPA\\w*", simplify = TRUE))
+
+## Check URBANA spelling
+unique(str_extract_all(my_data$arrestee_home_city, pattern = "\\bURBA\\w*", simplify = TRUE))
+
+## Replace wrong spelling
+my_data$arrestee_home_city = str_replace_all(my_data$arrestee_home_city, pattern = "\\bCHAMPA\\w*", replacement = "CHAMPAIGN")
+my_data$arrestee_home_city = str_replace_all(my_data$arrestee_home_city, pattern = "URBAAN", replacement = "URBANA")
+my_data$arrestee_home_city = str_replace_all(my_data$arrestee_home_city, pattern = "URBANQA", replacement = "URBANA")
+my_data$arrestee_home_city = str_replace_all(my_data$arrestee_home_city, pattern = "URBANAI", replacement = "URBANA")
+my_data$arrestee_home_city = str_replace_all(my_data$arrestee_home_city, pattern = "URBAN", replacement = "URBANA")
+my_data$arrestee_home_city = str_replace_all(my_data$arrestee_home_city, pattern = "URBANAA", replacement = "URBANA")
+
+# mutate a column specify Champaign or Urbana or other home cities.
+my_data %>% 
+  mutate(homecity = ifelse((arrestee_home_city == "CHAMPAIGN" | arrestee_home_city == "URBANA"), arrestee_home_city, "OTHERS" )) %>% 
+## Graph to show proportions of arrestee home city in each year
+  ggplot(aes(x = year_of_arrest, fill = homecity)) +
+  geom_histogram(binwidth = 0.5, color="#e9ecef", alpha=0.9) +
+  ggtitle("Arrestee Home City in Urbana-Champaign since 2000") +
+  labs(x = "Year", y = "Number of Arrests")
+  
+```
+
+Based on this graph, we can see that most arrestees are from URBANA. Arrestess from CHAMPAIGN and Other home cities roughtly contribute the same to the total number of arrests in each year.
+
+### Time Line
+
+```{mermaid}
+gantt
+       dateFormat  YYYY-MM-DD
+       title FINAL PROJECT TIME LINE for STAT 447 - GROUP 15
+
+       section A section
+       Split tasks               :done,    des1, 2023-04-024,2d
+       Data Cleaning             :done,    des2, 2023-04-025,2d
+       Feature Engineering       :done,    des3, 2023-04-026,2d
+       EDA                       :done,    des4, 2023-04-028,3d
+       Abstract                  :done,    des5, 2023-05-007,1d
+       Future task               :         des3, after des2, 5d
+
+       section Documentation
+       Describe gantt syntax               :active, a1, after des1, 3d
+       Add gantt diagram to demo page      :after a1  , 20h
+       Add another diagram to demo page    :doc1, after a1  , 48h
+```
+
+## Contribution
+
+Xiangyu Jin is responsible for Explanatory Data Analysis: 50%
+
+Vinayak Bagdi is responsible for Abstract, Introduction and Related Works: 50%
