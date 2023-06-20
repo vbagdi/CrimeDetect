@@ -4,7 +4,7 @@
 - **Team Name:** The Scientists
 - **Team Members:**
   - Xiangyu Jin (xjin13)
-  - Nicholas Wong (nwong27)
+  - Vinayak Bagdi (vbagdi2)
 
 ## Overview 
 
@@ -16,7 +16,7 @@ Place each stage of the contribution here.
 
 ### Proposal
 
-Xiangyu 90 Nick 10
+Xiangyu 50 Vinayak 50
 
 ### Progress
 
